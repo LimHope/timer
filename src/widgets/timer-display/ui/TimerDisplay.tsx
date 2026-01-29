@@ -62,14 +62,19 @@ export function TimerDisplay() {
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // AI 도우미 내부에서는 단축키 무시
       const target = e.target as HTMLElement
-      if (target.closest('[data-ai-helper="true"]')) {
-        return
-      }
 
-      // 스페이스바: 시작/일시정지
+      // AI 도우미, input, textarea, contentEditable 요소에서는 단축키 무시
+      const isInAiHelper = target.closest('[data-ai-helper="true"]')
+      const isInputElement = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA'
+      const isContentEditable = target.isContentEditable
+      const isInDialog = target.closest('[role="dialog"]')
+
+      // 스페이스바: 시작/일시정지 (입력 가능한 요소나 모달 내부에서는 무시)
       if (e.key === ' ') {
+        if (isInAiHelper || isInputElement || isContentEditable || isInDialog) {
+          return // 스페이스바를 일반 입력으로 처리
+        }
         e.preventDefault()
         if (isRunning) {
           pause()
@@ -78,8 +83,11 @@ export function TimerDisplay() {
         }
       }
 
-      // 엔터: AI 도우미 열기
+      // 엔터: AI 도우미 열기 (입력 요소에서는 무시)
       if (e.key === 'Enter') {
+        if (isInAiHelper || isInputElement || isContentEditable) {
+          return
+        }
         e.preventDefault()
         openAiHelper()
       }
@@ -107,8 +115,8 @@ export function TimerDisplay() {
 
   return (
     <>
-      <Card className="w-full max-w-2xl shadow-2xl bg-white">
-        <CardContent className="flex flex-col items-center gap-8 p-12">
+      <Card className="w-full max-w-2xl shadow-2xl bg-gradient-to-br from-white to-gray-50 border-2 border-gray-100">
+        <CardContent className="flex flex-col items-center gap-6 p-12">
           <CircularProgress
             seconds={seconds}
             totalSeconds={TIMER_SECONDS}
@@ -123,9 +131,16 @@ export function TimerDisplay() {
             onReset={reset}
           />
 
-          <div className="text-sm text-gray-500 mt-4">
-            <kbd className="px-2 py-1 bg-gray-100 border border-gray-300 rounded">Space</kbd> 시작/일시정지 |{' '}
-            <kbd className="px-2 py-1 bg-gray-100 border border-gray-300 rounded">Enter</kbd> AI 도우미
+          <div className="text-xs text-gray-500 mt-2 flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <kbd className="px-2.5 py-1 bg-white border border-gray-300 rounded shadow-sm font-semibold text-gray-700">Space</kbd>
+              <span className="text-gray-600">시작/일시정지</span>
+            </div>
+            <div className="w-px h-4 bg-gray-300"></div>
+            <div className="flex items-center gap-2">
+              <kbd className="px-2.5 py-1 bg-white border border-gray-300 rounded shadow-sm font-semibold text-gray-700">Enter</kbd>
+              <span className="text-gray-600">AI 도우미</span>
+            </div>
           </div>
         </CardContent>
       </Card>

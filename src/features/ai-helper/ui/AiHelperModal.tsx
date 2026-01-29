@@ -19,6 +19,7 @@ export function AiHelperModal() {
   const [isLoading, setIsLoading] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const lastEnterTimeRef = useRef<number>(0)
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -29,6 +30,30 @@ export function AiHelperModal() {
       textareaRef.current.focus()
     }
   }, [isOpen])
+
+  // 더블 엔터로 모달 닫기
+  useEffect(() => {
+    if (!isOpen) return
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // textarea 내부가 아닐 때만 더블 엔터 감지
+      const target = e.target as HTMLElement
+      if (target.tagName === 'TEXTAREA') return
+
+      if (e.key === 'Enter') {
+        const now = Date.now()
+        if (now - lastEnterTimeRef.current < 500) {
+          // 500ms 이내 더블 엔터
+          e.preventDefault()
+          close()
+        }
+        lastEnterTimeRef.current = now
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [isOpen, close])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -92,9 +117,14 @@ export function AiHelperModal() {
         data-ai-helper="true"
       >
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-teal-600" />
-            AI 공부 도우미
+          <DialogTitle className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-teal-600" />
+              AI 공부 도우미
+            </div>
+            <span className="text-xs font-normal text-gray-500">
+              닫기: Enter 빠르게 2번
+            </span>
           </DialogTitle>
         </DialogHeader>
 

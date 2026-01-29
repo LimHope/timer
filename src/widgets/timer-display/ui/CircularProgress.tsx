@@ -43,11 +43,11 @@ export function CircularProgress({ seconds, totalSeconds }: CircularProgressProp
       {/* Time display */}
       <div className="absolute inset-0 flex items-center justify-center">
         <div className="text-center">
-          <div className="text-6xl font-bold tabular-nums text-gray-800">
+          <div className="text-7xl font-bold tabular-nums text-gray-900 tracking-tight">
             {minutes.toString().padStart(2, '0')}:{secs.toString().padStart(2, '0')}
           </div>
-          <div className="text-sm text-gray-500 mt-2">
-            활동을 자동으로 감지하고 있습니다
+          <div className="text-xs text-gray-400 mt-3 font-medium">
+            자동 활동 감지
           </div>
         </div>
       </div>
