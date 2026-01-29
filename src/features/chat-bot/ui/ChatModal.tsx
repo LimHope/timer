@@ -21,7 +21,9 @@ export function ChatModal() {
     setLoading(true)
 
     try {
-      const reply = await sendMessage(message)
+      // 전체 대화 기록을 포함하여 전송
+      const updatedMessages = [...messages, { role: 'user' as const, content: message }]
+      const reply = await sendMessage(updatedMessages)
       addMessage('assistant', reply)
     } catch (error) {
       toast({
