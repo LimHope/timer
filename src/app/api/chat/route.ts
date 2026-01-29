@@ -3,30 +3,27 @@ import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(req: NextRequest) {
   try {
-    const { message } = await req.json()
+    const { messages } = await req.json()
 
-    if (!message) {
+    if (!messages || !Array.isArray(messages) || messages.length === 0) {
       return NextResponse.json(
-        { error: 'Message is required' },
+        { error: 'Messages array is required' },
         { status: 400 }
       )
     }
 
-    // Using OpenAI Chat Completions API (the standard approach)
+    // Using OpenAI Chat Completions API with full conversation history
     const response = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
         {
           role: 'system',
-          content: 'You are a helpful study assistant. Keep answers concise and educational. Respond in Korean.'
+          content: 'You are a helpful study assistant. Provide clear, accurate, and educational answers. Always respond in Korean. Use examples when helpful and break down complex topics into understandable parts.'
         },
-        {
-          role: 'user',
-          content: message
-        }
+        ...messages
       ],
       temperature: 0.7,
-      max_tokens: 500
+      max_tokens: 1000
     })
 
     const reply = response.choices[0]?.message?.content || '응답을 생성할 수 없습니다.'

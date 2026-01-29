@@ -40,18 +40,39 @@ export function AiHelperModal() {
     setIsLoading(true)
 
     try {
-      // TODO: AI API 연동
-      // 임시 응답
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      // AI API 호출
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          messages: [...messages, { role: 'user', content: userMessage }]
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('API 요청 실패')
+      }
+
+      const data = await response.json()
+
       setMessages((prev) => [
         ...prev,
         {
           role: 'assistant',
-          content: '안녕하세요! 저는 공부를 도와드리는 AI 도우미입니다. 무엇을 도와드릴까요?'
+          content: data.reply
         }
       ])
     } catch (error) {
       console.error('AI Helper Error:', error)
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: 'assistant',
+          content: '죄송합니다. 응답을 생성하는 중 오류가 발생했습니다. 다시 시도해주세요.'
+        }
+      ])
     } finally {
       setIsLoading(false)
     }
